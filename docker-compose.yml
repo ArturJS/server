@@ -2,6 +2,7 @@ version: '3'
 
 services:
   serve-docker:
+    image: loeffel/serve
     build:
       context: .
       dockerfile: Dockerfile
