@@ -2,6 +2,8 @@
 
 ## Installation
 
+- Replace `TOKEN`
+
 ```bash
 docker run -d \
     --restart always \
