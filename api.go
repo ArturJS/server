@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/mholt/archiver/v3"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"time"
 )
@@ -65,16 +67,58 @@ func (api *api) response(error, data interface{}) gin.H {
 	}
 }
 
+func (api *api) authenticate() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authorizationHeader := c.Request.Header.Get("Authorization")
+
+		if authorizationHeader == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response("authorization header is missing", nil))
+			return
+		}
+
+		bearerToken := strings.Split(authorizationHeader, " ")
+
+		if len(bearerToken) != 2 {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response("invalid bearer token", nil))
+			return
+		}
+
+		token, err := jwt.Parse(bearerToken[1], func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+
+			return []byte(api.getToken()), nil
+		})
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response(err.Error(), nil))
+			return
+		}
+
+		if !token.Valid {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response("invalid token", nil))
+			return
+		}
+	}
+}
+
 func (api *api) startServer() error {
 	gin.SetMode(api.getMode())
 	r := gin.Default()
 
 	// config
-	r.MaxMultipartMemory = api.getMaxSize() << 20 // 8 MiB
+	r.MaxMultipartMemory = api.getMaxSize() << 20
 
 	// routes
 	r.GET("/ok", api.ok)
-	r.POST("/deploy", api.deploy)
+
+	// auth routes
+	authGroup := r.Group("/")
+	authGroup.Use(api.authenticate())
+	{
+		authGroup.POST("/deploy", api.deploy)
+	}
 
 	return r.Run(":" + api.getPort())
 }
