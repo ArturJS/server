@@ -64,6 +64,7 @@ func (api *api) ok(c *gin.Context) {
 }
 
 func (api *api) deploy(c *gin.Context) {
+	ctx := context.Background()
 	timestamp := time.Now().Unix()
 	service := c.PostForm("service")
 	file, err := c.FormFile("file")
@@ -150,8 +151,6 @@ func (api *api) deploy(c *gin.Context) {
 	}
 
 	// start docker container
-	ctx := context.Background()
-
 	// build args
 	args := new(args)
 	args.push("-p", "serve")
@@ -182,7 +181,7 @@ func (api *api) deploy(c *gin.Context) {
 	dockerCmd.Dir = symlink
 
 	// output
-	out, err := dockerCmd.Output()
+	out, err := dockerCmd.CombinedOutput()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.response(err.Error(), out))
