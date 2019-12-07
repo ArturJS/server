@@ -130,7 +130,7 @@ func (api *api) ok(c *gin.Context) {
 func (api *api) deploy(c *gin.Context) {
 	ctx := context.Background()
 	timestamp := time.Now().Unix()
-	service := c.PostForm("service")
+	name := c.PostForm("name")
 	file, err := c.FormFile("file")
 
 	if err != nil {
@@ -140,7 +140,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// create deployment dir
 	err = os.MkdirAll(
-		fmt.Sprintf("/home/serve/deployments/%s", service),
+		fmt.Sprintf("/home/serve/deployments/%s", name),
 		os.ModePerm,
 	)
 
@@ -152,7 +152,7 @@ func (api *api) deploy(c *gin.Context) {
 	// save file
 	err = c.SaveUploadedFile(
 		file,
-		fmt.Sprintf("/home/serve/deployments/%s/%d.zip", service, timestamp),
+		fmt.Sprintf("/home/serve/deployments/%s/%d.zip", name, timestamp),
 	)
 
 	if err != nil {
@@ -162,7 +162,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// create build dir
 	err = os.MkdirAll(
-		fmt.Sprintf("/home/serve/builds/%s/%d", service, timestamp),
+		fmt.Sprintf("/home/serve/builds/%s/%d", name, timestamp),
 		os.ModePerm,
 	)
 
@@ -173,8 +173,8 @@ func (api *api) deploy(c *gin.Context) {
 
 	// unzip to build dir
 	err = api.getZip().Unarchive(
-		fmt.Sprintf("/home/serve/deployments/%s/%d.zip", service, timestamp),
-		fmt.Sprintf("/home/serve/builds/%s/%d", service, timestamp),
+		fmt.Sprintf("/home/serve/deployments/%s/%d.zip", name, timestamp),
+		fmt.Sprintf("/home/serve/builds/%s/%d", name, timestamp),
 	)
 
 	if err != nil {
@@ -184,7 +184,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// create container dir
 	err = os.MkdirAll(
-		fmt.Sprintf("/home/serve/containers/%s", service),
+		fmt.Sprintf("/home/serve/containers/%s", name),
 		os.ModePerm,
 	)
 
@@ -194,7 +194,7 @@ func (api *api) deploy(c *gin.Context) {
 	}
 
 	// remove symlink if exists
-	symlink := fmt.Sprintf("/home/serve/containers/%s/latest", service)
+	symlink := fmt.Sprintf("/home/serve/containers/%s/latest", name)
 
 	if _, err := os.Lstat(symlink); err == nil {
 		if err = os.Remove(symlink); err != nil {
@@ -205,7 +205,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// symlink
 	err = os.Symlink(
-		fmt.Sprintf("/home/serve/builds/%s/%d", service, timestamp),
+		fmt.Sprintf("/home/serve/builds/%s/%d", name, timestamp),
 		symlink,
 	)
 
@@ -238,7 +238,7 @@ func (api *api) deploy(c *gin.Context) {
 		)
 	}
 
-	args.push("up", "-d", "--build", service)
+	args.push("up", "-d", "--build", name)
 
 	// docker command
 	dockerCmd := exec.CommandContext(ctx, "/usr/local/bin/docker-compose", args.data...)
