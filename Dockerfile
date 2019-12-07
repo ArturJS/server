@@ -13,4 +13,4 @@ RUN chmod +x /home/serve-server
 
 EXPOSE 8080/tcp
 WORKDIR "/home"
-CMD TZ=UTC ./serve-server
+CMD TZ=UTC MAX_SIZE=${MAX_SIZE} TOKEN=${TOKEN} ./serve-server

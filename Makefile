@@ -15,7 +15,7 @@ docker-run:
       -v /var/run/docker.sock:/var/run/docker.sock:ro \
       -v ~/serve:/home/serve \
       -e MAX_SIZE=32 \
-      -e TOKEN="Rdgn3-*CGkyNnB!f" \
+      -e TOKEN="RANDOM-TOKEN-HERE" \
       loeffel/serve
 
 docker-watchtower:
