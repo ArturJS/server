@@ -1,4 +1,4 @@
-# serve-server
+# Serve Server - Painless Docker Deployments
 
 ```bash
 docker run -d \
