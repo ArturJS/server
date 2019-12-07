@@ -16,6 +16,12 @@ docker-run:
       -v ~/serve:/home/serve \
       loeffel/serve
 
+docker-watchtower:
+	docker run -d \
+    	--name watchtower \
+    	-v /var/run/docker.sock:/var/run/docker.sock:ro \
+    	v2tec/watchtower serve
+
 build-run:
 	make go-build
 	make docker-build
