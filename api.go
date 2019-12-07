@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/mholt/archiver/v3"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -150,18 +151,34 @@ func (api *api) deploy(c *gin.Context) {
 
 	// start docker container
 	ctx := context.Background()
-	dockerCmd := exec.CommandContext(
-		ctx,
-		"/usr/local/bin/docker-compose",
-		"-p serve",
-		"-f",
-		"/home/serve/containers/*/latest/docker-compose.yml",
-		"up",
-		"-d",
-		"--build",
-		service,
-	)
 
+	// build args
+	args := new(args)
+	args.push("-p", "serve")
+
+	// push all containers
+	containers, err := ioutil.ReadDir("/home/serve/containers")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		return
+	}
+
+	for _, container := range containers {
+		if !container.IsDir() {
+			continue
+		}
+
+		args.push(
+			"-f",
+			fmt.Sprintf("/home/serve/containers/%s/latest/docker-compose.yml", container.Name()),
+		)
+	}
+
+	args.push("up", "-d", "--build", service)
+
+	// docker command
+	dockerCmd := exec.CommandContext(ctx, "/usr/local/bin/docker-compose", args.data...)
 	dockerCmd.Dir = symlink
 
 	// output

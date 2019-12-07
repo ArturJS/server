@@ -43,8 +43,6 @@ func main() {
 		RWMutex: new(sync.RWMutex),
 	}
 
-	log.Println("test 123")
-
 	if err = api.startServer(); err != nil {
 		logger.Error(err)
 	}
