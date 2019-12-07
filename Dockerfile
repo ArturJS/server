@@ -11,5 +11,6 @@ RUN curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-c
 RUN chmod +x /usr/local/bin/docker-compose
 RUN chmod +x /home/serve-server
 
+EXPOSE 8080/tcp
 WORKDIR "/home"
-CMD TZ=${TZ} ./serve-server
+CMD TZ=UTC ./serve-server

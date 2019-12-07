@@ -9,6 +9,10 @@ import (
 	"sync"
 )
 
+const (
+	port = "8080"
+)
+
 func main() {
 	var (
 		err error
@@ -34,7 +38,7 @@ func main() {
 	// api
 	api := &api{
 		zip:     zip,
-		port:    "8080",
+		port:    port,
 		mode:    "debug",
 		RWMutex: new(sync.RWMutex),
 	}
