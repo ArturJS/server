@@ -6,6 +6,7 @@ import (
 	"github.com/mholt/archiver/v3"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"strconv"
 	"sync"
 )
 
@@ -35,11 +36,26 @@ func main() {
 		RWMutex: new(sync.RWMutex),
 	}
 
-	// api
+	// Config
+	maxSize, err := strconv.ParseInt(getenv("MAX_SIZE", "32"), 10, 64)
+
+	if err != nil {
+		logger.Error(err)
+	}
+
+	token, err := mustenv("TOKEN")
+
+	if err != nil {
+		logger.Error(err)
+	}
+
+	// API
 	api := &api{
 		zip:     zip,
 		port:    port,
 		mode:    "debug",
+		maxSize: maxSize,
+		token:   token,
 		RWMutex: new(sync.RWMutex),
 	}
 

@@ -14,9 +14,12 @@ import (
 )
 
 type api struct {
-	zip  *archiver.Zip
-	port string
-	mode string
+	zip     *archiver.Zip
+	port    string
+	mode    string
+	maxSize int64
+	token   string
+
 	*sync.RWMutex
 }
 
@@ -41,6 +44,20 @@ func (api *api) getZip() *archiver.Zip {
 	return api.zip
 }
 
+func (api *api) getMaxSize() int64 {
+	api.RLock()
+	defer api.RUnlock()
+
+	return api.maxSize
+}
+
+func (api *api) getToken() string {
+	api.RLock()
+	defer api.RUnlock()
+
+	return api.token
+}
+
 func (api *api) response(error, data interface{}) gin.H {
 	return gin.H{
 		"error": error,
@@ -51,6 +68,9 @@ func (api *api) response(error, data interface{}) gin.H {
 func (api *api) startServer() error {
 	gin.SetMode(api.getMode())
 	r := gin.Default()
+
+	// config
+	r.MaxMultipartMemory = api.getMaxSize() << 20 // 8 MiB
 
 	// routes
 	r.GET("/ok", api.ok)

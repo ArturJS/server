@@ -14,6 +14,8 @@ docker-run:
       -p 8080:8080 \
       -v /var/run/docker.sock:/var/run/docker.sock:ro \
       -v ~/serve:/home/serve \
+      -e MAX_SIZE=32 \
+      -e TOKEN="Rdgn3-*CGkyNnB!f" \
       loeffel/serve
 
 docker-watchtower:
