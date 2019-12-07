@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mholt/archiver/v3"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -69,8 +68,6 @@ func (api *api) response(error, data interface{}) gin.H {
 func (api *api) startServer() error {
 	gin.SetMode(api.getMode())
 	r := gin.Default()
-
-	log.Printf("%+v", api)
 
 	// config
 	r.MaxMultipartMemory = api.getMaxSize() << 20 // 8 MiB
