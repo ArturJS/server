@@ -1,6 +1,6 @@
 <img width="180" src="https://raw.githubusercontent.com/loeffel-io/serve-server/master/serve-logo.png" alt="logo">
 
-# WIP: Serve Server - Painless Docker Deployments
+# Serve Server - Painless Docker Deployments
 
 [![Build Status](https://travis-ci.com/loeffel-io/serve-server.svg?token=diwUYjrdo8kHiwiMCFuq&branch=master)](https://travis-ci.com/loeffel-io/serve-server)
 
