@@ -24,7 +24,3 @@ docker run -d \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
     v2tec/watchtower serve
 ```
-
-## Client
-
-[Serve Client](https://github.com/loeffel-io/serve)
