@@ -1,14 +1,8 @@
-<p align="center">
-  <a href="https://vuepress.vuejs.org/" target="_blank">
-    <img width="180" src="https://raw.githubusercontent.com/loeffel-io/serve-server/master/serve-logo.png" alt="logo">
-  </a>
-</p>
+<img width="180" src="https://raw.githubusercontent.com/loeffel-io/serve-server/master/serve-logo.png" alt="logo">
 
-<p align="center">
-  <a href="https://travis-ci.com/loeffel-io/serve-server"><img src="https://travis-ci.com/loeffel-io/serve-server.svg?token=diwUYjrdo8kHiwiMCFuq&branch=master" alt="Build"></a>
-</p>
+# WIP: Serve Server - Painless Docker Deployments
 
-<h2 align="center">WIP: Serve Server - Painless Docker Deployments</h2>
+[![Build Status](https://travis-ci.com/loeffel-io/serve-server.svg?token=diwUYjrdo8kHiwiMCFuq&branch=master)](https://travis-ci.com/loeffel-io/serve-server)
 
 ## Installation
 
