@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -130,8 +131,21 @@ func (api *api) ok(c *gin.Context) {
 func (api *api) deploy(c *gin.Context) {
 	ctx := context.Background()
 	timestamp := time.Now().Unix()
+
+	// fields
 	name := c.PostForm("name")
+	shared := c.PostForm("shared")
+
+	// file
 	file, err := c.FormFile("file")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		return
+	}
+
+	// shared
+	isShared, err := strconv.ParseBool(shared)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
@@ -211,6 +225,12 @@ func (api *api) deploy(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		return
+	}
+
+	// shared
+	if isShared {
+		c.JSON(http.StatusOK, api.response(nil, "done"))
 		return
 	}
 
