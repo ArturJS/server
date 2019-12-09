@@ -273,5 +273,5 @@ func (api *api) deploy(c *gin.Context) {
 	}
 
 	// done
-	c.JSON(http.StatusOK, api.response(nil, fmt.Sprintf("done with %s", out)))
+	c.JSON(http.StatusOK, api.response(nil, out))
 }
