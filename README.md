@@ -2,6 +2,8 @@
 
 # Makeless Server - Painless Docker Deployments
 
+[![Build Status](https://travis-ci.com/makeless/server.svg?branch=master)](https://travis-ci.com/makeless/server)
+
 ## Installation
 
 - Replace `TOKEN`
