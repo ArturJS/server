@@ -4,6 +4,10 @@
 
 [![Build Status](https://travis-ci.com/makeless/server.svg?branch=master)](https://travis-ci.com/makeless/server)
 
+## Documentation
+
+[makeless.io](https://makeless.io)
+
 ## Installation
 
 - Replace `TOKEN`
