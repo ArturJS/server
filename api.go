@@ -154,7 +154,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// create deployment dir
 	err = os.MkdirAll(
-		fmt.Sprintf("/home/serve/deployments/%s", name),
+		fmt.Sprintf("/home/makeless/deployments/%s", name),
 		os.ModePerm,
 	)
 
@@ -166,7 +166,7 @@ func (api *api) deploy(c *gin.Context) {
 	// save file
 	err = c.SaveUploadedFile(
 		file,
-		fmt.Sprintf("/home/serve/deployments/%s/%d.zip", name, timestamp),
+		fmt.Sprintf("/home/makeless/deployments/%s/%d.zip", name, timestamp),
 	)
 
 	if err != nil {
@@ -176,7 +176,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// create build dir
 	err = os.MkdirAll(
-		fmt.Sprintf("/home/serve/builds/%s/%d", name, timestamp),
+		fmt.Sprintf("/home/makeless/builds/%s/%d", name, timestamp),
 		os.ModePerm,
 	)
 
@@ -187,8 +187,8 @@ func (api *api) deploy(c *gin.Context) {
 
 	// unzip to build dir
 	err = api.getZip().Unarchive(
-		fmt.Sprintf("/home/serve/deployments/%s/%d.zip", name, timestamp),
-		fmt.Sprintf("/home/serve/builds/%s/%d", name, timestamp),
+		fmt.Sprintf("/home/makeless/deployments/%s/%d.zip", name, timestamp),
+		fmt.Sprintf("/home/makeless/builds/%s/%d", name, timestamp),
 	)
 
 	if err != nil {
@@ -198,7 +198,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// create container dir
 	err = os.MkdirAll(
-		fmt.Sprintf("/home/serve/containers/%s", name),
+		fmt.Sprintf("/home/makeless/containers/%s", name),
 		os.ModePerm,
 	)
 
@@ -208,7 +208,7 @@ func (api *api) deploy(c *gin.Context) {
 	}
 
 	// remove symlink if exists
-	symlink := fmt.Sprintf("/home/serve/containers/%s/latest", name)
+	symlink := fmt.Sprintf("/home/makeless/containers/%s/latest", name)
 
 	if _, err := os.Lstat(symlink); err == nil {
 		if err = os.Remove(symlink); err != nil {
@@ -219,7 +219,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// symlink
 	err = os.Symlink(
-		fmt.Sprintf("/home/serve/builds/%s/%d", name, timestamp),
+		fmt.Sprintf("/home/makeless/builds/%s/%d", name, timestamp),
 		symlink,
 	)
 
@@ -237,10 +237,10 @@ func (api *api) deploy(c *gin.Context) {
 	// start docker container
 	// build args
 	args := new(args)
-	args.push("-p", "serve")
+	args.push("-p", "makeless")
 
 	// push all containers
-	containers, err := ioutil.ReadDir("/home/serve/containers")
+	containers, err := ioutil.ReadDir("/home/makeless/containers")
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
@@ -254,7 +254,7 @@ func (api *api) deploy(c *gin.Context) {
 
 		args.push(
 			"-f",
-			fmt.Sprintf("/home/serve/containers/%s/latest/docker-compose.yml", container.Name()),
+			fmt.Sprintf("/home/makeless/containers/%s/latest/docker-compose.yml", container.Name()),
 		)
 	}
 

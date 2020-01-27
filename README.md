@@ -1,8 +1,8 @@
-<img width="180" src="https://raw.githubusercontent.com/loeffel-io/serve-server/master/serve-logo.png" alt="logo">
+<img width="180" src="https://raw.githubusercontent.com/makeless/server/master/makeless-logo.png" alt="logo">
 
-# Serve Server - Painless Docker Deployments
+# Makeless Server - Painless Docker Deployments
 
-[![Build Status](https://travis-ci.com/loeffel-io/serve-server.svg?token=diwUYjrdo8kHiwiMCFuq&branch=master)](https://travis-ci.com/loeffel-io/serve-server)
+[![Build Status](https://travis-ci.com/makeless/server.svg?branch=master)](https://travis-ci.com/makeless/server)
 
 ## Installation
 
@@ -11,16 +11,16 @@
 ```bash
 docker run -d \
     --restart always \
-    --name serve \
+    --name makeless \
     -p 8080:8080 \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    -v ~/serve:/home/serve \
+    -v ~/makeless:/home/makeless \
     -e MAX_SIZE=32 \
     -e TOKEN="RANDOM-TOKEN-HERE" \
-    loeffel/serve
+    makeless/server
 
 docker run -d \
     --name watchtower \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    v2tec/watchtower serve
+    v2tec/watchtower makeless
 ```

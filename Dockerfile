@@ -5,12 +5,12 @@ RUN apt-get update && \
         apt-transport-https bash-completion ca-certificates curl && \
     apt-get clean && apt-get --yes --quiet autoremove --purge
 
-COPY serve-server /home/serve-server
+COPY makeless-server /home/makeless-server
 
 RUN curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 RUN chmod +x /usr/local/bin/docker-compose
-RUN chmod +x /home/serve-server
+RUN chmod +x /home/makeless-server
 
 EXPOSE 8080/tcp
 WORKDIR "/home"
-CMD TZ=UTC MAX_SIZE=${MAX_SIZE} TOKEN=${TOKEN} ./serve-server
+CMD TZ=UTC MAX_SIZE=${MAX_SIZE} TOKEN=${TOKEN} ./makeless-server
