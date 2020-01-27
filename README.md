@@ -7,24 +7,3 @@
 ## Documentation
 
 [makeless.io](https://makeless.io)
-
-## Installation
-
-- Replace `TOKEN`
-
-```bash
-docker run -d \
-    --restart always \
-    --name makeless \
-    -p 8080:8080 \
-    -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    -v ~/makeless:/home/makeless \
-    -e MAX_SIZE=32 \
-    -e TOKEN="RANDOM-TOKEN-HERE" \
-    makeless/server
-
-docker run -d \
-    --name watchtower \
-    -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    v2tec/watchtower makeless
-```
