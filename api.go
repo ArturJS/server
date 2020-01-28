@@ -6,11 +6,12 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/mholt/archiver/v3"
+	"github.com/otiai10/copy"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -129,12 +130,18 @@ func (api *api) ok(c *gin.Context) {
 }
 
 func (api *api) deploy(c *gin.Context) {
+	var config config
+
 	ctx := context.Background()
 	timestamp := time.Now().Unix()
 
-	// fields
-	name := c.PostForm("name")
-	shared := c.PostForm("shared")
+	// config
+	err := yaml.Unmarshal([]byte(c.PostForm("config")), &config)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		return
+	}
 
 	// file
 	file, err := c.FormFile("file")
@@ -145,16 +152,11 @@ func (api *api) deploy(c *gin.Context) {
 	}
 
 	// shared
-	isShared, err := strconv.ParseBool(shared)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
-		return
-	}
+	isShared := len(config.Service) == 0
 
 	// create deployment dir
 	err = os.MkdirAll(
-		fmt.Sprintf("/home/makeless/deployments/%s", name),
+		fmt.Sprintf("/home/makeless/deployments/%s", config.Name),
 		os.ModePerm,
 	)
 
@@ -166,7 +168,7 @@ func (api *api) deploy(c *gin.Context) {
 	// save file
 	err = c.SaveUploadedFile(
 		file,
-		fmt.Sprintf("/home/makeless/deployments/%s/%d.zip", name, timestamp),
+		fmt.Sprintf("/home/makeless/deployments/%s/%d.zip", config.Name, timestamp),
 	)
 
 	if err != nil {
@@ -176,7 +178,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// create build dir
 	err = os.MkdirAll(
-		fmt.Sprintf("/home/makeless/builds/%s/%d", name, timestamp),
+		fmt.Sprintf("/home/makeless/builds/%s/%d", config.Name, timestamp),
 		os.ModePerm,
 	)
 
@@ -187,8 +189,8 @@ func (api *api) deploy(c *gin.Context) {
 
 	// unzip to build dir
 	err = api.getZip().Unarchive(
-		fmt.Sprintf("/home/makeless/deployments/%s/%d.zip", name, timestamp),
-		fmt.Sprintf("/home/makeless/builds/%s/%d", name, timestamp),
+		fmt.Sprintf("/home/makeless/deployments/%s/%d.zip", config.Name, timestamp),
+		fmt.Sprintf("/home/makeless/builds/%s/%d", config.Name, timestamp),
 	)
 
 	if err != nil {
@@ -198,7 +200,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// create container dir
 	err = os.MkdirAll(
-		fmt.Sprintf("/home/makeless/containers/%s", name),
+		fmt.Sprintf("/home/makeless/containers/%s", config.Name),
 		os.ModePerm,
 	)
 
@@ -208,7 +210,7 @@ func (api *api) deploy(c *gin.Context) {
 	}
 
 	// remove symlink if exists
-	symlink := fmt.Sprintf("/home/makeless/containers/%s/latest", name)
+	symlink := fmt.Sprintf("/home/makeless/containers/%s/latest", config.Name)
 
 	if _, err := os.Lstat(symlink); err == nil {
 		if err = os.Remove(symlink); err != nil {
@@ -219,7 +221,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	// symlink
 	err = os.Symlink(
-		fmt.Sprintf("/home/makeless/builds/%s/%d", name, timestamp),
+		fmt.Sprintf("/home/makeless/builds/%s/%d", config.Name, timestamp),
 		symlink,
 	)
 
@@ -232,6 +234,21 @@ func (api *api) deploy(c *gin.Context) {
 	if isShared {
 		c.JSON(http.StatusOK, api.response(nil, "done"))
 		return
+	}
+
+	// use
+	for service, items := range config.Use {
+		for _, path := range items {
+			split := strings.Split(path, ":")
+
+			src := fmt.Sprintf("/home/makeless/containers/%s/latest/%s", service, split[0])
+			dst := fmt.Sprintf("/home/makeless/containers/%s/latest/%s", config.Name, split[1])
+
+			if err := copy.Copy(src, dst); err != nil {
+				c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+				return
+			}
+		}
 	}
 
 	// start docker container
@@ -258,7 +275,7 @@ func (api *api) deploy(c *gin.Context) {
 		)
 	}
 
-	args.push("up", "-d", "--build", name)
+	args.push("up", "-d", "--build", config.Name)
 
 	// docker command
 	dockerCmd := exec.CommandContext(ctx, "/usr/local/bin/docker-compose", args.data...)
