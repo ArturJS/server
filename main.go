@@ -49,16 +49,16 @@ func main() {
 		logger.Error(err)
 	}
 
+	ssl := false
 	// API
 	api := &api{
-		zip:      zip,
-		port:     port,
-		mode:     "debug",
-		maxSize:  maxSize,
-		token:    token,
-		certFile: os.Getenv("CERT_FILE"),
-		certKey:  os.Getenv("CERT_KEY"),
-		RWMutex:  new(sync.RWMutex),
+		ssl:     ssl,
+		zip:     zip,
+		port:    port,
+		mode:    "debug",
+		maxSize: maxSize,
+		token:   token,
+		RWMutex: new(sync.RWMutex),
 	}
 
 	if err = api.startServer(); err != nil {
