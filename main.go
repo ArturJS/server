@@ -13,8 +13,8 @@ import (
 const (
 	port = "8080"
 
-	certFile = "/root/ssl/server.crt"
-	keyFile  = "/root/ssl/server.key"
+	certFile = "/home/certs/server.crt"
+	keyFile  = "/home/certs/server.key"
 )
 
 func main() {
