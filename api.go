@@ -289,7 +289,7 @@ func (api *api) deploy(c *gin.Context) {
 	dockerCmd.Dir = symlink
 
 	// output
-	out, err := dockerCmd.CombinedOutput()
+	out, err := dockerCmd.Output()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.response(err.Error(), out))
