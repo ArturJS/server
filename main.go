@@ -12,6 +12,9 @@ import (
 
 const (
 	port = "8080"
+
+	certFile = "/root/ssl/server.crt"
+	keyFile  = "/root/ssl/server.key"
 )
 
 func main() {
@@ -49,7 +52,16 @@ func main() {
 		logger.Error(err)
 	}
 
-	ssl := false
+	// SSL
+	ssl := true
+
+	for _, path := range []string{certFile, keyFile} {
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			ssl = false
+			break
+		}
+	}
+
 	// API
 	api := &api{
 		ssl:     ssl,

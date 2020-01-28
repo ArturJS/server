@@ -14,6 +14,7 @@ docker-run:
       -p 8080:8080 \
       -v /var/run/docker.sock:/var/run/docker.sock:ro \
       -v ~/makeless:/home/makeless \
+      -v ~/certs:/home/certs \
       -e MAX_SIZE=32 \
       -e TOKEN="RANDOM-TOKEN-HERE" \
       makeless/server
