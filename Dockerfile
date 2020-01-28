@@ -13,4 +13,4 @@ RUN chmod +x /home/makeless-server
 
 EXPOSE 8080/tcp
 WORKDIR "/home"
-CMD TZ=UTC MAX_SIZE=${MAX_SIZE} TOKEN=${TOKEN} ./makeless-server
+CMD TZ=UTC MAX_SIZE=${MAX_SIZE} TOKEN=${TOKEN} CERT_FILE=${CERT_FILE} CERT_KEY=${CERT_KEY} ./makeless-server

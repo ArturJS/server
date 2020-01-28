@@ -18,11 +18,13 @@ import (
 )
 
 type api struct {
-	zip     *archiver.Zip
-	port    string
-	mode    string
-	maxSize int64
-	token   string
+	zip      *archiver.Zip
+	port     string
+	mode     string
+	maxSize  int64
+	token    string
+	certFile string
+	certKey  string
 
 	*sync.RWMutex
 }
@@ -120,6 +122,10 @@ func (api *api) startServer() error {
 	authGroup.Use(api.authenticate())
 	{
 		authGroup.POST("/deploy", api.deploy)
+	}
+
+	if api.certFile != "" && api.certKey != "" {
+		return r.RunTLS(":"+api.getPort(), api.certFile, api.certKey)
 	}
 
 	return r.Run(":" + api.getPort())
