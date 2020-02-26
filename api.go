@@ -292,7 +292,7 @@ func (api *api) deploy(c *gin.Context) {
 	out, err := dockerCmd.CombinedOutput()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), out))
+		c.JSON(http.StatusInternalServerError, api.response(fmt.Errorf("%s: %s", err.Error(), out), nil))
 		return
 	}
 
