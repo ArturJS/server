@@ -5,7 +5,7 @@ notifications:
 language: go
 
 go:
-  - "1.12.x"
+  - "1.13.x"
 
 addons:
   apt:
@@ -13,9 +13,10 @@ addons:
       - docker-ce
 
 before_script:
-  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.17.1
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.23.6
 
 script:
+  - make install
   - make linter
   - make build-run
 
