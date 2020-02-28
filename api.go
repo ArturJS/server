@@ -65,10 +65,11 @@ func (api *api) getToken() string {
 	return api.token
 }
 
-func (api *api) response(error, data interface{}) gin.H {
+func (api *api) response(error, data interface{}, base64 bool) gin.H {
 	return gin.H{
-		"error": error,
-		"data":  data,
+		"error":  error,
+		"data":   data,
+		"base64": base64,
 	}
 }
 
@@ -77,14 +78,14 @@ func (api *api) authenticate() gin.HandlerFunc {
 		authorizationHeader := c.Request.Header.Get("Authorization")
 
 		if authorizationHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response("authorization header is missing", nil))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response("authorization header is missing", nil, false))
 			return
 		}
 
 		bearerToken := strings.Split(authorizationHeader, " ")
 
 		if len(bearerToken) != 2 {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response("invalid bearer token", nil))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response("invalid bearer token", nil, false))
 			return
 		}
 
@@ -97,12 +98,12 @@ func (api *api) authenticate() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response(err.Error(), nil))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response(err.Error(), nil, false))
 			return
 		}
 
 		if !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response("invalid token", nil))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.response("invalid token", nil, false))
 			return
 		}
 	}
@@ -133,7 +134,7 @@ func (api *api) startServer() error {
 }
 
 func (api *api) ok(c *gin.Context) {
-	c.JSON(http.StatusOK, api.response(nil, "ok"))
+	c.JSON(http.StatusOK, api.response(nil, "ok", false))
 }
 
 func (api *api) deploy(c *gin.Context) {
@@ -146,7 +147,7 @@ func (api *api) deploy(c *gin.Context) {
 	err := yaml.Unmarshal([]byte(c.PostForm("config")), &config)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 		return
 	}
 
@@ -154,7 +155,7 @@ func (api *api) deploy(c *gin.Context) {
 	file, err := c.FormFile("file")
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 		return
 	}
 
@@ -168,7 +169,7 @@ func (api *api) deploy(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 		return
 	}
 
@@ -179,7 +180,7 @@ func (api *api) deploy(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 		return
 	}
 
@@ -190,7 +191,7 @@ func (api *api) deploy(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 		return
 	}
 
@@ -201,7 +202,7 @@ func (api *api) deploy(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 		return
 	}
 
@@ -212,7 +213,7 @@ func (api *api) deploy(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 		return
 	}
 
@@ -221,7 +222,7 @@ func (api *api) deploy(c *gin.Context) {
 
 	if _, err := os.Lstat(symlink); err == nil {
 		if err = os.Remove(symlink); err != nil {
-			c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+			c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 			return
 		}
 	}
@@ -233,13 +234,13 @@ func (api *api) deploy(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 		return
 	}
 
 	// shared
 	if isShared {
-		c.JSON(http.StatusOK, api.response(nil, "done"))
+		c.JSON(http.StatusOK, api.response(nil, "done", false))
 		return
 	}
 
@@ -252,7 +253,7 @@ func (api *api) deploy(c *gin.Context) {
 			dst := fmt.Sprintf("/home/makeless/containers/%s/latest/%s", config.Name, split[1])
 
 			if err := copy.Copy(src, dst); err != nil {
-				c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+				c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 				return
 			}
 		}
@@ -267,7 +268,7 @@ func (api *api) deploy(c *gin.Context) {
 	containers, err := ioutil.ReadDir("/home/makeless/containers")
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
 		return
 	}
 
@@ -292,10 +293,10 @@ func (api *api) deploy(c *gin.Context) {
 	out, err := dockerCmd.CombinedOutput()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, api.response(err.Error(), out))
+		c.JSON(http.StatusInternalServerError, api.response(err.Error(), out, true))
 		return
 	}
 
 	// done
-	c.JSON(http.StatusOK, api.response(nil, out))
+	c.JSON(http.StatusOK, api.response(nil, out, true))
 }
