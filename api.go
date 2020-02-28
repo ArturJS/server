@@ -18,14 +18,12 @@ import (
 )
 
 type api struct {
-	ssl      bool
-	zip      *archiver.Zip
-	port     string
-	mode     string
-	maxSize  int64
-	token    string
-	certFile string
-	certKey  string
+	ssl     bool
+	zip     *archiver.Zip
+	port    string
+	mode    string
+	maxSize int64
+	token   string
 
 	*sync.RWMutex
 }
