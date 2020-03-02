@@ -257,10 +257,49 @@ func (api *api) deploy(c *gin.Context) {
 		}
 	}
 
+	// pull docker container
+	// build args
+	if config.Pull {
+		pullArgs := new(args)
+
+		// push all containers
+		containers, err := ioutil.ReadDir("/home/makeless/containers")
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, api.response(err.Error(), nil, false))
+			return
+		}
+
+		for _, container := range containers {
+			if !container.IsDir() {
+				continue
+			}
+
+			pullArgs.push(
+				"-f",
+				fmt.Sprintf("/home/makeless/containers/%s/latest/docker-compose.yml", container.Name()),
+			)
+		}
+
+		pullArgs.push("pull", config.Name)
+
+		// docker command
+		dockerPullCmd := exec.CommandContext(ctx, "/usr/local/bin/docker-compose", pullArgs.data...)
+		dockerPullCmd.Dir = symlink
+
+		// output
+		out, err := dockerPullCmd.CombinedOutput()
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, api.response(err.Error(), out, true))
+			return
+		}
+	}
+
 	// start docker container
 	// build args
-	args := new(args)
-	args.push("-p", "makeless")
+	upArgs := new(args)
+	upArgs.push("-p", "makeless")
 
 	// push all containers
 	containers, err := ioutil.ReadDir("/home/makeless/containers")
@@ -275,20 +314,20 @@ func (api *api) deploy(c *gin.Context) {
 			continue
 		}
 
-		args.push(
+		upArgs.push(
 			"-f",
 			fmt.Sprintf("/home/makeless/containers/%s/latest/docker-compose.yml", container.Name()),
 		)
 	}
 
-	args.push("up", "-d", "--build", config.Name)
+	upArgs.push("up", "-d", "--build", config.Name)
 
 	// docker command
-	dockerCmd := exec.CommandContext(ctx, "/usr/local/bin/docker-compose", args.data...)
-	dockerCmd.Dir = symlink
+	dockerUpCmd := exec.CommandContext(ctx, "/usr/local/bin/docker-compose", upArgs.data...)
+	dockerUpCmd.Dir = symlink
 
 	// output
-	out, err := dockerCmd.CombinedOutput()
+	out, err := dockerUpCmd.CombinedOutput()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, api.response(err.Error(), out, true))
